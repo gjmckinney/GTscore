@@ -2,6 +2,7 @@
 use Algorithm::Combinatorics qw(combinations);
 use strict;
 use Getopt::Long;
+use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
 
 #--------------------------------------------------------------------------------
 #AmpliconReadCounter.pl
@@ -36,6 +37,7 @@ use Getopt::Long;
 #	5/9/2018
 #--------------------------------------------------------------------------------
 
+#record starting time so that total time to count reads can be reported
 my$startTime=time;
 
 #get options from command line
@@ -43,29 +45,52 @@ my$primerProbeFile='';
 my$sequenceFiles='';
 my$prefix='';
 my$printDiscarded;
+my$printMatched;
 my$useFullPrimer;
+my$alleleOrder="alphabetical";
+my$inDir='';
+my$inputType="fq";
 
-GetOptions('p=s' => \$primerProbeFile, 'files=s' => \$sequenceFiles, 'prefix=s' =>\$prefix, 'printDiscarded' => \$printDiscarded, 'useFullPrimer' => \$useFullPrimer);
+GetOptions('p=s' => \$primerProbeFile, 'files=s' => \$sequenceFiles, 'prefix=s' =>\$prefix, 'printDiscarded' => \$printDiscarded, 
+			'printMatched' => \$printMatched,'useFullPrimer' => \$useFullPrimer, 'alleleOrder=s' => \$alleleOrder, 'inDir=s' => \$inDir,
+			'i=s' => \$inputType);
 
-#get minimum primer length
+
+#open primer probe file to get minimum primer length
+#store this value for use in primer trimming below
 open(PRIMERPROBE,"<$primerProbeFile")||die "cannot open $primerProbeFile:$!";
 my$primerProbeHeader=<PRIMERPROBE>;
+
+
 #initialize minimum primer length with ridiculously large value to guarantee real values are smaller
 my$minPrimerLength=100000000;
 while (my$line=<PRIMERPROBE>){
 	chomp $line;
-	my($locusID,$ploidy,$SNPpos,$allele1,$allele2,$probe1,$probe2,$primer)=split "\t", $line;
+	my($locusID,$ploidy,$SNPpos,$allele1,$allele2,$probe1,$probe2,$primer,$A1corr,$A2corr)=split "\t", $line,10;
 	my$primerLength=length($primer);
 	if($primerLength<$minPrimerLength){
 		$minPrimerLength=$primerLength
 	}
 }
 
+#if($type eq "campbellStyle"){
+#	$minPrimerLength=14;
+#}
+
+#$minPrimerLength=14;
 
 open(PRIMERPROBE,"<$primerProbeFile")||die "cannot open $primerProbeFile:$!";
 
 my$primerProbeHeader=<PRIMERPROBE>;
 chomp $primerProbeHeader;
+
+#get number of columns in primer probe file, use this to check if correction factors were used
+my@primerProbeHeaderCols=split "\t", $primerProbeHeader;
+my$corrFactorsEngaged=0;
+if(scalar@primerProbeHeaderCols==10){
+	$corrFactorsEngaged=1;
+}
+
 my%primerProbeAllele;
 my%primerProbeLocus;
 my%primerProbeHapAllele;
@@ -75,6 +100,13 @@ my%ploidy;
 my%hapPloidy;
 #EXPERIMENTAL
 my%primerLengths;
+my%corrFactors;
+my%primerProbeNum;
+my%primerProbeAlleleNum;
+my%lociNumOrder;
+my%primerProbeHapLocus;
+###experimental
+my%SNPalleleOrder;
 
 #store lists of loci to order later output of locus table and allele reads files
 my@loci;
@@ -82,7 +114,7 @@ my@hapLoci;
 
 while (my$line=<PRIMERPROBE>){
 	chomp $line;
-	my($locusID,$ploidy,$SNPpos,$allele1,$allele2,$probe1,$probe2,$primer)=split "\t", $line;
+	my($locusID,$ploidy,$SNPpos,$allele1,$allele2,$probe1,$probe2,$primer,$A1corr,$A2corr)=split "\t", $line, 10;
 	#store primer probe information in hash of hashes
 	my$locus_SNP=$locusID."_".$SNPpos;
 	#store ploidy for single SNP loci
@@ -100,7 +132,6 @@ while (my$line=<PRIMERPROBE>){
 	
 	#if trimPrimers is enabled trim all primers to same length for substring sequence matching,
 	#this greatly increase speed
-	#if($trimPrimers){
 	if(!$useFullPrimer){
 		$primer=substr($primer, 0, $minPrimerLength);
 	}
@@ -108,6 +139,23 @@ while (my$line=<PRIMERPROBE>){
 	#my$trimmedPrimer=$primer;
 	my$primerLength=length($primer);
 	$primerLengths{$primerLength}++;
+	
+	#store allele order information for each SNP
+	#if allele order is original then allele 1 is first, allele 2 is second
+	#if allele order is alphabetical then sort alleles before storing
+	if($alleleOrder eq "original"){
+		$SNPalleleOrder{$locus_SNP}[1]=$allele1;
+		$SNPalleleOrder{$locus_SNP}[2]=$allele2;
+	}elsif($alleleOrder eq "alphabetical"){
+		if($allele1 lt $allele2){
+			$SNPalleleOrder{$locus_SNP}[1]=$allele1;
+			$SNPalleleOrder{$locus_SNP}[2]=$allele2;
+		}else{
+			$SNPalleleOrder{$locus_SNP}[1]=$allele2;
+			$SNPalleleOrder{$locus_SNP}[2]=$allele1;
+		}
+	}
+	
 	
 	#store allele information
 	$primerProbeAllele{$primer}{$probe1}=$allele1;
@@ -129,21 +177,27 @@ while (my$line=<PRIMERPROBE>){
 	$hapLoci{$locusID}{$SNPpos}{$allele1}++;
 	$hapLoci{$locusID}{$SNPpos}{$allele2}++;
 	
+	
+	######EXPERIMENTAL
+	#store correction factor information
+	$corrFactors{$locus_SNP}{$allele1}=$A1corr;
+	$corrFactors{$locus_SNP}{$allele2}=$A2corr;
+	#store probe information sorted by allele order
+	$primerProbeNum{$primer}[1]=$probe1;
+	$primerProbeNum{$primer}[2]=$probe2;
+	#store allele information sorted by allele order
+	$primerProbeAlleleNum{$primer}[1]=$allele1;
+	$primerProbeAlleleNum{$primer}[2]=$allele2;
+	#store allele information sorted by allele order
+	$lociNumOrder{$locus_SNP}[1]=$allele1;
+	$lociNumOrder{$locus_SNP}[2]=$allele2;
+	#store haplotype locus name to access with primer in campbellStyle
+	$primerProbeHapLocus{$primer}=$locusID;
+
 
 }
 close PRIMERPROBE;
 
-##store list of loci to order later output of locus table
-#my@loci;
-#foreach my$key (sort keys %loci){
-#	push@loci,$key;
-#}
-
-##store list of loci to order later output of haplotype locus table
-#my@hapLoci;
-#foreach my$key (sort keys %hapLoci){
-#	push@hapLoci, $key;
-#}
 
 #Store haplotype alleles for each locus.  Construct and save all possible combinations of SNPs ordered by position
 my%lociHapAlleles;
@@ -223,24 +277,40 @@ foreach my$seqFile (@sequenceFiles){
 	my($sampleID,$ext)=split '\.', $seqFile, 2;
 	push@samples,$sampleID;
 	
+	#if input directory is specified, add to seqFile
+	if ($inDir){
+		$seqFile=$inDir."/".$seqFile;
+	}
 	#Hash sequences for each sample, retain count of occurances for each unique sequence
 	my%seqHash;
-	open(SAMPLE,"<$seqFile")||die "cannot open $seqFile:$!";
+	my$sampleFH;
+	if($inputType eq "fq"){
+		open($sampleFH,"<$seqFile")||die "cannot open $seqFile:$!";
+	}
+	if($inputType eq "fastqgz"){
+		$sampleFH = new IO::Uncompress::Gunzip $seqFile or die "gunzip failed: $GunzipError\n";
+	}
 	my$lineCount=0;
-	while(my$line=<SAMPLE>){
+	while(my$line=<$sampleFH>){
 		chomp $line;
 		$lineCount++;
 		if($lineCount%4==2){
 			$seqHash{$line}++;
 		}
 	}
-	close SAMPLE;
+	close $sampleFH;
 	
-	#write unmatched reads to file if printDiscard is enabled
+	#write unmatched reads to file if printDiscarded is enabled
 	if ($printDiscarded){
 		my$unmatchedReadFile=$sampleID."_unmatchedReads.txt";
 		open(UNMATCHED,">$unmatchedReadFile")||die "cannot open $unmatchedReadFile:$!";
 		print UNMATCHED "Sequence\tCount\n";
+	}
+	#write matched reads to file if printMatched is enabled
+	if ($printMatched){
+		my$matchedReadFile=$sampleID."_matchedReads.txt";
+		open(MATCHED,">$matchedReadFile")||die "cannot open $matchedReadFile:$!";
+		print MATCHED "Sequence\tCount\n";
 	}
 	
 	my$matchedLocusID="";
@@ -267,10 +337,22 @@ foreach my$seqFile (@sequenceFiles){
 				$primerMatched=1;
 				#Count alleles for single SNP genotypes
 				foreach my$probeKey (keys %{$primerProbeAllele{$trimmedSeq}}){
+					#fix indels first by changing to numeric code, then back with the ? in front
+					my$revCompProbeKey=$probeKey;
+					$revCompProbeKey=~s/A\?/1/g;
+					$revCompProbeKey=~s/C\?/2/g;
+					$revCompProbeKey=~s/G\?/3/g;
+					$revCompProbeKey=~s/T\?/4/g;
+					$revCompProbeKey=~s/1/\?A/g;
+					$revCompProbeKey=~s/2/\?C/g;
+					$revCompProbeKey=~s/3/\?G/g;
+					$revCompProbeKey=~s/4/\?T/g;
 					#test for reverse complement matches to probe
-					my$revCompProbeKey=reverse($probeKey);
+					#my$revCompProbeKey=reverse($probeKey);
+					$revCompProbeKey=reverse($revCompProbeKey);
 					$revCompProbeKey=~tr/ATCG/TAGC/;
 					$revCompProbeKey=~tr/\]\[/\[\]/;
+					
 					if(($sequence=~/$probeKey/)||($sequence=~/$revCompProbeKey/)){
 						#store matched allele
 						my$alleleMatch=$primerProbeAllele{$trimmedSeq}{$probeKey};
@@ -293,8 +375,19 @@ foreach my$seqFile (@sequenceFiles){
 					my$haplotypeAlleleMatch;
 					foreach my$SNPkey (sort {$a <=> $b} keys %{$primerProbeHapAllele{$trimmedSeq}{$IDkey}}){
 						foreach my$probeKey (keys %{$primerProbeHapAllele{$trimmedSeq}{$IDkey}{$SNPkey}}){
+							#fix indels first by changing to numeric code, then back with the ? in front
+							my$revCompProbeKey=$probeKey;
+							$revCompProbeKey=~s/A\?/1/g;
+							$revCompProbeKey=~s/C\?/2/g;
+							$revCompProbeKey=~s/G\?/3/g;
+							$revCompProbeKey=~s/T\?/4/g;
+							$revCompProbeKey=~s/1/\?A/g;
+							$revCompProbeKey=~s/2/\?C/g;
+							$revCompProbeKey=~s/3/\?G/g;
+							$revCompProbeKey=~s/4/\?T/g;
 							#test for reverse complement matches to probe
-							my$revCompProbeKey=reverse($probeKey);
+							#my$revCompProbeKey=reverse($probeKey);
+							$revCompProbeKey=reverse($revCompProbeKey);
 							$revCompProbeKey=~tr/ATCG/TAGC/;
 							$revCompProbeKey=~tr/\]\[/\[\]/;
 							if(($sequence=~/$probeKey/)||($sequence=~/$revCompProbeKey/)){
@@ -322,6 +415,9 @@ foreach my$seqFile (@sequenceFiles){
 		#for each sample assign read counts to primer probe matched, probe only matched, or off target reads
 		if($primerProbeMatched==1){
 			$samplePrimerProbeMatched{$sampleID}+=$uniqueSeqCount;
+			if ($printMatched){
+				print MATCHED "$sequence\t$seqHash{$seq}\n";
+			}
 		}elsif($primerMatched==1){
 			$samplePrimerOnlyMatched{$sampleID}+=$uniqueSeqCount;
 			if ($printDiscarded){
@@ -342,6 +438,9 @@ foreach my$seqFile (@sequenceFiles){
 	}
 	if ($printDiscarded){
 		close UNMATCHED;
+	}
+	if ($printMatched){
+		close MATCHED;
 	}
 	my$sampleEndTime=time;
 	my$sampleTotalTime=$sampleEndTime-$sampleStartTime;
@@ -388,13 +487,6 @@ foreach my$sample (@samples){
 		$primerProbePercent=$samplePrimerProbeMatched{$sample}/$sampleTotalReads{$sample};
 		$primerProbePercent=sprintf("%.2f",$primerProbePercent);
 	}
-	#calculate proportion of reads in each category (off target, primer only alignment, primer and probe alignment
-	#my$offTargetPercent=$sampleOffTarget{$sample}/$sampleTotalReads{$sample};
-	#$offTargetPercent=sprintf("%.2f",$offTargetPercent);
-	#my$primerOnlyPercent=$samplePrimerOnlyMatched{$sample}/$sampleTotalReads{$sample};
-	#$primerOnlyPercent=sprintf("%.2f",$primerOnlyPercent);
-	#my$primerProbePercent=$samplePrimerProbeMatched{$sample}/$sampleTotalReads{$sample};
-	#$primerProbePercent=sprintf("%.2f",$primerProbePercent);
 	print INDSUMMARY "$sample\t$sampleTotalReads{$sample}\t$sampleOffTarget{$sample}\t$samplePrimerOnlyMatched{$sample}\t$samplePrimerProbeMatched{$sample}\t$offTargetPercent\t$primerOnlyPercent\t$primerProbePercent\n";
 }
 close INDSUMMARY;
@@ -442,45 +534,55 @@ my$singleSNPlocusTable=$prefix."LocusTable_singleSNPs.txt";
 open(LOCUSTABLE,">$singleSNPlocusTable")||die "cannot open $singleSNPlocusTable:$!";
 #open(LOCUSTABLE,">LocusTable_singleSNPs.txt")||die "cannot open LocusTable_singleSNPs.txt:$!";
 #print LOCUSTABLE "Locus_ID\trefAllele\taltAlleles\talleles\n";
-print LOCUSTABLE "Locus_ID\tploidy\talleles\n";
+if($corrFactorsEngaged==1){
+	print LOCUSTABLE "Locus_ID\tploidy\talleles\tcorrectionFactors\n";
+}else{
+	print LOCUSTABLE "Locus_ID\tploidy\talleles\n";
+}
+
 foreach my$locus (@loci){
 	#print LOCUSTABLE "$locus";
 	print LOCUSTABLE "$locus\t$ploidy{$locus}";
 	my$alleles;
 	my$alleleCount=0;
-	foreach my$alleleKey (sort keys %{$loci{$locus}}){
-		$alleleCount++;
-		#print LOCUSTABLE "\t$alleleKey";
-		if($alleleCount==1){
-			$alleles=$alleleKey;
-		}else{
-			$alleles.=",$alleleKey";
-		}
+	my$corrFactors;
+	
+	my$allele1=$SNPalleleOrder{$locus}[1];
+	my$allele2=$SNPalleleOrder{$locus}[2];
+	
+	$alleles=$allele1.",".$allele2;
+	$corrFactors=$corrFactors{$locus}{$allele1}.",".$corrFactors{$locus}{$allele2};
+	if($corrFactorsEngaged==1){
+		print LOCUSTABLE "\t$alleles\t$corrFactors\n";
+	}else{
+		print LOCUSTABLE "\t$alleles\n";
 	}
-	print LOCUSTABLE "\t$alleles\n";
 }
 
-#print locus table for multi-SNP haplotypes
-my$haplotypeLocusTable=$prefix."LocusTable_haplotypes.txt";
-open(HAPLOCUSTABLE,">$haplotypeLocusTable")||die "cannot open $haplotypeLocusTable:$!";
-#open(HAPLOCUSTABLE,">LocusTable_haplotypes.txt")||die "cannot open LocusTable_haplotypes.txt:$!";
-print HAPLOCUSTABLE "Locus_ID\tploidy\talleles\n";
-foreach my$locus (@hapLoci){
-	#print HAPLOCUSTABLE "$locus";
-	print HAPLOCUSTABLE "$locus\t$hapPloidy{$locus}";
-	my$alleles;
-	my$alleleCount=0;
-	foreach my$alleleKey (sort keys %{$lociHapAlleles{$locus}}){
-		$alleleCount++;
-		#print HAPLOCUSTABLE "\t$alleleKey";
-		if($alleleCount==1){
-			$alleles=$alleleKey;
-		}else{
-			$alleles.=",$alleleKey";
+
+#if($type eq "GTscore"){
+	#print locus table for multi-SNP haplotypes
+	my$haplotypeLocusTable=$prefix."LocusTable_haplotypes.txt";
+	open(HAPLOCUSTABLE,">$haplotypeLocusTable")||die "cannot open $haplotypeLocusTable:$!";
+	#open(HAPLOCUSTABLE,">LocusTable_haplotypes.txt")||die "cannot open LocusTable_haplotypes.txt:$!";
+	print HAPLOCUSTABLE "Locus_ID\tploidy\talleles\n";
+	foreach my$locus (@hapLoci){
+		#print HAPLOCUSTABLE "$locus";
+		print HAPLOCUSTABLE "$locus\t$hapPloidy{$locus}";
+		my$alleles;
+		my$alleleCount=0;
+		foreach my$alleleKey (sort keys %{$lociHapAlleles{$locus}}){
+			$alleleCount++;
+			#print HAPLOCUSTABLE "\t$alleleKey";
+			if($alleleCount==1){
+				$alleles=$alleleKey;
+			}else{
+				$alleles.=",$alleleKey";
+			}
 		}
+		print HAPLOCUSTABLE "\t$alleles\n";
 	}
-	print HAPLOCUSTABLE "\t$alleles\n";
-}
+#}
 
 #################################################################################
 #
@@ -502,42 +604,29 @@ foreach my$locus (@loci){
 	foreach my$sample (@samples){
 		#print "$sample\n";
 		print ALLELEREADS "\t";
-		my$alleleCount=0;
 		if(exists $alleleCounts{$sample}{$locus}){
-			foreach my$alleleKey (sort keys %{$loci{$locus}}){
-				$alleleCount++;
-				if(exists $alleleCounts{$sample}{$locus}{$alleleKey}){
-					#print the number of reads found for an allele
-					#print "$sample\t$locus\t$alleleKey\t$alleleCounts{$sample}{$locus}{$alleleKey}\n";
-					if($alleleCount==1){
-						print ALLELEREADS "$alleleCounts{$sample}{$locus}{$alleleKey}";
-					}else{
-						print ALLELEREADS ",$alleleCounts{$sample}{$locus}{$alleleKey}";
-					}
-				}else{
-					#if there are no reads for an allele print 0
-					if($alleleCount==1){
-						print ALLELEREADS "0";
-					}else{
-						print ALLELEREADS ",0";
-					}
-				}
+			#my$allele1=$lociNumOrder{$locus}[1];
+			#my$allele2=$lociNumOrder{$locus}[2];
+			my$allele1=$SNPalleleOrder{$locus}[1];
+			my$allele2=$SNPalleleOrder{$locus}[2];
+			
+			if(exists $alleleCounts{$sample}{$locus}{$allele1}){
+				print ALLELEREADS "$alleleCounts{$sample}{$locus}{$allele1}";
+			}else{
+				print ALLELEREADS "0";
+			}
+			if(exists $alleleCounts{$sample}{$locus}{$allele2}){
+				print ALLELEREADS ",$alleleCounts{$sample}{$locus}{$allele2}";
+			}else{
+				print ALLELEREADS ",0";
 			}
 		}else{
-			#if a locus has no reads for a sample print 0 for each allele
-			foreach my$alleleKey (sort keys %{$loci{$locus}}){
-				$alleleCount++;
-				#print "$sample\t$locus\t$alleleKey\t0\n";
-				if($alleleCount==1){
-					print ALLELEREADS "0";
-				}else{
-					print ALLELEREADS ",0";
-				}
-			}
+			print ALLELEREADS "0,0";
 		}
 	}
 	print ALLELEREADS "\n";
 }
+
 
 #print alleleReads table for multi-SNP haplotypes
 my$haplotypeAlleleReadsFile=$prefix."AlleleReads_haplotypes.txt";
@@ -591,6 +680,7 @@ foreach my$locus (@hapLoci){
 	}
 	print HAPALLELEREADS "\n";
 }
+
 
 my$endTime=time;
 my$totalTime=$endTime-$startTime;
