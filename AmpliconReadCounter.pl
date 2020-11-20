@@ -49,10 +49,11 @@ my$printMatched;
 my$useFullPrimer;
 my$alleleOrder="alphabetical";
 my$inDir='';
+my$outDir='';
 my$inputType="fq";
 
 GetOptions('p=s' => \$primerProbeFile, 'files=s' => \$sequenceFiles, 'prefix=s' =>\$prefix, 'printDiscarded' => \$printDiscarded, 
-			'printMatched' => \$printMatched,'useFullPrimer' => \$useFullPrimer, 'alleleOrder=s' => \$alleleOrder, 'inDir=s' => \$inDir,
+			'printMatched' => \$printMatched,'useFullPrimer' => \$useFullPrimer, 'alleleOrder=s' => \$alleleOrder, 'inDir=s' => \$inDir, 'outDir=s' => \$outDir,
 			'i=s' => \$inputType);
 
 
@@ -303,12 +304,18 @@ foreach my$seqFile (@sequenceFiles){
 	#write unmatched reads to file if printDiscarded is enabled
 	if ($printDiscarded){
 		my$unmatchedReadFile=$sampleID."_unmatchedReads.txt";
+		if ($outDir){
+			$unmatchedReadFile=$outDir."/".$sampleID."_unmatchedReads.txt";
+		}
 		open(UNMATCHED,">$unmatchedReadFile")||die "cannot open $unmatchedReadFile:$!";
 		print UNMATCHED "Sequence\tCount\n";
 	}
 	#write matched reads to file if printMatched is enabled
 	if ($printMatched){
 		my$matchedReadFile=$sampleID."_matchedReads.txt";
+		if ($outDir){
+			$matchedReadFile=$outDir."/".$sampleID."_matchedReads.txt";
+		}
 		open(MATCHED,">$matchedReadFile")||die "cannot open $matchedReadFile:$!";
 		print MATCHED "Sequence\tCount\n";
 	}
@@ -453,6 +460,9 @@ foreach my$seqFile (@sequenceFiles){
 #
 #################################################################################
 my$indSummaryFile=$prefix."GTscore_individualSummary.txt";
+if ($outDir){
+	$indSummaryFile=$outDir."/".$prefix."GTscore_individualSummary.txt";
+}
 open(INDSUMMARY,">$indSummaryFile")||die "cannot open $indSummaryFile:$!";
 #open(INDSUMMARY,">GTscore_individualSummary.txt")||die "cannot open GTscore_individualSummary.txt:$!";
 print INDSUMMARY "Sample\tTotal Reads\tOff-target Reads\tPrimer Only Reads\tPrimer Probe Reads\tOff-target Proportion\tPrimer Only Proportion\tPrimer Probe Proportion\n";
@@ -498,6 +508,9 @@ close INDSUMMARY;
 #################################################################################
 
 my$locusSummaryFile=$prefix."GTscore_locusSummary.txt";
+if ($outDir){
+	$locusSummaryFile=$outDir."/".$prefix."GTscore_locusSummary.txt";
+}
 open(LOCUSSUMMARY,">$locusSummaryFile")||die "cannot open $locusSummaryFile:$!";
 #open(LOCUSSUMMARY,">GTscore_locusSummary.txt")||die "cannot open GTscore_locusSummary.txt:$!";
 print LOCUSSUMMARY "Locus\tPrimer Reads\tPrimer Probe Reads\tPrimer Probe Proportion\n";
@@ -531,6 +544,9 @@ close LOCUSSUMMARY;
 
 #print locus table for single-SNP genotypes
 my$singleSNPlocusTable=$prefix."LocusTable_singleSNPs.txt";
+if ($outDir){
+	$singleSNPlocusTable=$outDir."/".$prefix."LocusTable_singleSNPs.txt";
+}
 open(LOCUSTABLE,">$singleSNPlocusTable")||die "cannot open $singleSNPlocusTable:$!";
 #open(LOCUSTABLE,">LocusTable_singleSNPs.txt")||die "cannot open LocusTable_singleSNPs.txt:$!";
 #print LOCUSTABLE "Locus_ID\trefAllele\taltAlleles\talleles\n";
@@ -563,6 +579,9 @@ foreach my$locus (@loci){
 #if($type eq "GTscore"){
 	#print locus table for multi-SNP haplotypes
 	my$haplotypeLocusTable=$prefix."LocusTable_haplotypes.txt";
+	if ($outDir){
+		$haplotypeLocusTable=$outDir."/".$prefix."LocusTable_haplotypes.txt";
+	}
 	open(HAPLOCUSTABLE,">$haplotypeLocusTable")||die "cannot open $haplotypeLocusTable:$!";
 	#open(HAPLOCUSTABLE,">LocusTable_haplotypes.txt")||die "cannot open LocusTable_haplotypes.txt:$!";
 	print HAPLOCUSTABLE "Locus_ID\tploidy\talleles\n";
@@ -592,6 +611,9 @@ foreach my$locus (@loci){
 
 #print alleleReads table for single-SNP genotypes
 my$alleleReadsFile=$prefix."AlleleReads_singleSNPs.txt";
+if ($outDir){
+	$alleleReadsFile=$outDir."/".$prefix."AlleleReads_singleSNPs.txt";
+}
 open(ALLELEREADS,">$alleleReadsFile")||die "cannot open $alleleReadsFile:$!";
 #open(ALLELEREADS,">AlleleReads_singleSNPs.txt")||die "cannot open AlleleReads_singleSNPs.txt:$!";
 foreach my$sample (@samples){
@@ -630,6 +652,9 @@ foreach my$locus (@loci){
 
 #print alleleReads table for multi-SNP haplotypes
 my$haplotypeAlleleReadsFile=$prefix."AlleleReads_haplotypes.txt";
+if ($outDir){
+	$haplotypeAlleleReadsFile=$outDir."/".$prefix."AlleleReads_haplotypes.txt";
+}
 open(HAPALLELEREADS,">$haplotypeAlleleReadsFile")||die "cannot open $haplotypeAlleleReadsFile:$!";
 #open(HAPALLELEREADS,">AlleleReads_haplotypes.txt")||die "cannot open AlleleReads_haplotypes.txt:$!";
 foreach my$sample (@samples){
