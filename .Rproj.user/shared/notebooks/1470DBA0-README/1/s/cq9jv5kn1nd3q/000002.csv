@@ -1,0 +1,4 @@
+"0","#example with poor quality loci and contaminated sample removed"
+"0","exportGenepop(polyGenResults_singleSNP,singleSNP_locusTable,"
+"0","              locusBlacklist=poorQualitySNPs,sampleBlacklist=contaminatedSample,"
+"0","              filename=""polyGenResults_singleSNP_genepop_filtered.txt"")"

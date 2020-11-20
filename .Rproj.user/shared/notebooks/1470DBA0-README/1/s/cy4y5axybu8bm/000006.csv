@@ -1,0 +1,2 @@
+"0","polyGenResults_dupTest<-read.delim(""polyGenResults_dupTest.txt"",stringsAsFactors=FALSE)"
+"0","head(polyGenResults_dupTest)"

@@ -1,0 +1,3 @@
+"0","GTscore_individualSummary<-read.delim(""GTscore_individualSummary.txt"",header=TRUE,stringsAsFactors=FALSE)"
+"0",""
+"0","head(GTscore_individualSummary)"

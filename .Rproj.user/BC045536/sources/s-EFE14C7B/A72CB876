@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1605810567769.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "A72CB876",
+    "lastKnownWriteTime" : 1605831085,
+    "last_content_update" : 1605831085924,
+    "path" : "D:/GitHub/GTscore/GTscore.R",
+    "project_path" : "GTscore.R",
+    "properties" : {
+        "cursorPosition" : "62,5",
+        "scrollLine" : "52"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

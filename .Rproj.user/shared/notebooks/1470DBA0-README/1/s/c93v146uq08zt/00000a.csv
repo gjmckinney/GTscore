@@ -1,0 +1,3 @@
+"0","ggplot()+geom_point(data=GTscore_individualSummary,aes(x=GenotypeRate,y=Heterozygosity))+"
+"0","  labs(title=""Heterozygosity vs Genotype Rate per Sample"", x=""Genotype Rate"", y=""Heterozygosity"")+"
+"0","  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))"

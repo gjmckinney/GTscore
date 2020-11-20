@@ -1,0 +1,2 @@
+"0","sampleMetaData<-data.frame(sample_type=""mixture"",repunit=NA,collection=""SSCK17P2"",indiv=colnames(polyGenResults_singleSNP))"
+"0","head(sampleMetaData)"

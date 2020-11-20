@@ -1,0 +1,7 @@
+"0","#plot heterozygosity vs genotype rate per sample"
+"0","#samples with unusually high heterozygosity relative to others are candidates for contamination"
+"0","#the sample above the dashed line in this example is likely contaminated"
+"0","ggplot()+geom_point(data=GTscore_individualSummary,aes(x=GenotypeRate,y=Heterozygosity))+"
+"0","  labs(title=""Heterozygosity vs Genotype Rate per Sample"", x=""Genotype Rate"", y=""Heterozygosity"")+"
+"0","  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))+"
+"0","  geom_hline(yintercept=0.30, lty=""dashed"")"

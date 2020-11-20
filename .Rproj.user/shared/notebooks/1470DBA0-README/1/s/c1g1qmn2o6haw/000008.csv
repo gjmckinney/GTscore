@@ -1,0 +1,5 @@
+"0","#dashed line added at 90% genotype rate, this is not a strict threshold, just a goal to aim for"
+"0","ggplot()+geom_point(data=GTscore_individualSummary,aes(x=Primer.Probe.Reads,y=GenotypeRate))+"
+"0","  labs(title=""Genotype Rate vs Total Reads per Sample"", x=""Primer Probe Reads"", y=""Genotype Rate"")+"
+"0","  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))+"
+"0","  geom_hline(yintercept=0.9,lty=""dashed"")"

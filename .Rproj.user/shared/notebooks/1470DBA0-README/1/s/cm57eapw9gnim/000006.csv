@@ -1,0 +1,3 @@
+"0","ggplot()+geom_point(data=singleSNP_summary,aes(x=AvgReadDepth,y=GenotypeRate))+ylim(0,1)+"
+"0","  labs(title=""Genotype Rate vs Average Depth per SNP"", x=""Average Depth"", y=""Genotype Rate"")+"
+"0","  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))"

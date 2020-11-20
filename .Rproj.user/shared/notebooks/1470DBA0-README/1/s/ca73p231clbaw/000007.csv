@@ -1,0 +1,2 @@
+"0",""
+"0","singleSNP_summary %>% ggplot(data=.) + geom_point(aes(x=conScore,y=minAF))"

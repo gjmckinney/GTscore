@@ -1,0 +1,2 @@
+"0","#example with no filtering"
+"0","exportGenepop(polyGenResults_singleSNP,singleSNP_locusTable,filename=""polyGenResults_singleSNP_genepop.txt"")"

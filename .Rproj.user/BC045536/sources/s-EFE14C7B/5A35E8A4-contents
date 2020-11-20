@@ -1,0 +1,505 @@
+---
+title: "GT-score: Pipeline for genotyping and troubleshooting amplicon sequencing data"
+author: "Garrett McKinney"
+date: "6/23/2020"
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,fig.path = "tools/")
+```
+
+```{r load packages, include=FALSE}
+library(here)
+
+```
+
+## About the data
+
+The raw sequence data used for this example is a subset of the data from:
+      McKinney et al. 2020. Dense SNP panels resolve closely related Chinook salmon populations. 
+      Canadian Journal of Fisheries and Aquatic Sciences (77) 451-461. DOI: 10.1139/cjfas-2019-0067
+
+Sequence data can be downloaded from NCBI BioProject PRJNA561127
+
+I have also made three "contaminated" samples by combining sequence reads from the following individuals: KAROL05_0009 and KAROL05_0010, KAROL05_0025 and KAROL05_0026, and KAROL05_0028 and KAROL05_0029.  These are used to demononstrate how to identify contaminated samples.
+
+
+## Count reads for amplicons
+
+The read counter is written in perl (AmpliconReadCounter.pl).  
+
+The program:   
+
+1. Identifies each unique sequence, then counts the number of times each unique sequence occurs within an individual
+
+2. Aligns each unique sequence with primer and probe; if the sequence doesn’t align, then it is excluded as an off-target sequence and reports by individual and by locus are given.
+
+* Note:  By default, all primers are trimmed to the length of the shortest primer to increase speed.  Optionally the full length primer can be used for the primer but this may significantly increase run timing depending on variation in primer lengths across loci.
+
+Input flags for this script are:
+
+* –p       a tab delimited file containing primer/probe information for each locus
+* --files  a text file containing a list of .fastq sequence files to count reads from. 
+
+Optional flags:
+
+* --prefix          optional prefix for output file names
+* --inDir           option to specify directory containing sequence data
+* --inputType       fq or fastqgz (defaults to fastqgz)
+* --useFullPrimer	  uses the full primer for counting reads rather than the trimmed primer
+* --alleleOrder     order of alleles output in locusTable file. Options are original (matches primer-probe file order) or alphabetical (default) 
+* --printMatched    outputs matched reads for each individual
+* --printDiscarded  outputs discarded reads for each individual
+
+
+AmpliconReadCounter.pl can be run on the command line or called from R
+
+
+#### Setting up directories and running AmpliconReadCounterl.pl
+
+create a folder with the sampleFile.txt file containing names of all the samples you'd like to genotype
+
+You can run AmpliconReadCounter.pl from the command line using the following example:
+  perl AmpliconReadCounter.pl -p primerProbeFile.txt --files sampleList.txt
+
+
+If you prefer to run this through R then you can use the following example:
+
+```{r count reads for amplicons, eval=FALSE}
+system2("perl",
+        args="AmpliconReadCounter.pl -p primerProbeFile.txt --files sampleFiles.txt")
+
+```
+  
+
+AmpliconReadCounter.pl outputs a LocusTable file and an AlleleReads file for single-SNP and haplotype data, plus two summary files.
+
+The default names for these files are:
+
+* LocusTable_singleSNPs.txt
+* AlleleReads_singleSNPs.txt
+* LocusTable_haplotypes.txt
+* AlleleReads_haplotypes.txt
+* GTscore_individualSummary.txt
+* GTscore_locusSummary.txt
+
+```{r, message=FALSE}
+#load GTscore
+source("GTscore.R")
+
+#load locus table and allele reads file
+singleSNP_locusTable<-read.delim("LocusTable_singleSNPs.txt",header=TRUE,stringsAsFactors=FALSE)
+singleSNP_alleleReads<-read.delim("AlleleReads_singleSNPs.txt",header=TRUE,row.names=1,stringsAsFactors=FALSE)
+
+head(singleSNP_locusTable)
+singleSNP_alleleReads[1:5,1:5]
+
+```
+
+## Genotyping
+
+Genotyping is accomplished using the polyGen function.  The genotyping algorithm is described in McKinney et al. 2018 and is a maximum likelihood algorithm capable of genotyping any number of alleles and ploidy per locus.  This allows genoyping of single SNPs as well as microhaplotypes, and loci with elevated ploidy.  
+
+Two arguments are required for polyGen, the locusTable and alleleReads files output by AmpliconReadCounter.
+
+Optional arguments for polyGen are:
+
+* p_thresh  - threshold p-value for likelihood ratio test (default 0.05)
+* epsilon   - error rate for genotyping model (default 0.01)
+
+```{r Genotyping}
+#generate singleSNP genotypes using the polyGen algorithm
+polyGenResults_singleSNP<-polyGen(singleSNP_locusTable,singleSNP_alleleReads)
+
+polyGenResults_singleSNP[1:5,1:5]
+```
+
+
+## Sample Summaries
+
+load sample summary from AmpliconReadCounter
+
+```{r}
+GTscore_individualSummary<-read.delim("GTscore_individualSummary.txt",header=TRUE,stringsAsFactors=FALSE)
+
+head(GTscore_individualSummary)
+```
+
+summarize single SNP results for samples
+
+```{r}
+singleSNP_sampleSummary<-summarizeSamples(polyGenResults_singleSNP)
+head(singleSNP_sampleSummary)
+```
+
+combine AmpliconReadCounter individual summary data with GTscore sample summary
+
+```{r}
+GTscore_individualSummary<-merge(GTscore_individualSummary,singleSNP_sampleSummary,by.x="Sample",by.y="sample")
+```
+
+plot histogram of genotype rate
+
+```{r histogram of genotype rate, warning=FALSE}
+ggplot()+geom_histogram(data=GTscore_individualSummary,aes(x=GenotypeRate),binwidth=0.03)+xlim(-0.01,1.01)+
+  labs(title="Sample Genotype Rate", x="Genotype Rate", y="Count")+
+  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))
+```
+
+plot histogram of heterozygosity
+
+```{r histogram of heterozygosity, warning=FALSE}
+ggplot()+geom_histogram(data=GTscore_individualSummary,aes(x=Heterozygosity),binwidth=0.03)+xlim(-0.01,1.01)+
+  labs(title="Sample Heterozygosity", x="Heterozygosity", y="Count")+
+  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))
+```
+
+plot genotype rate vs primer probe reads
+
+```{r genotype rate vs primer probe reads}
+#dashed line added at 90% genotype rate, this is not a strict threshold, just a goal to aim for
+ggplot()+geom_point(data=GTscore_individualSummary,aes(x=Primer.Probe.Reads,y=GenotypeRate))+
+  labs(title="Genotype Rate vs Total Reads per Sample", x="Primer Probe Reads", y="Genotype Rate")+
+  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))+
+  geom_hline(yintercept=0.9,lty="dashed")
+```
+
+
+samples with unusually high heterozygosity may be contaminated or have elevated ploidy.  In this case, the three "contaminated" samples that were generated by combining reads from multiple individuals all show elevated heterozygosity.
+
+plot heterozygosity vs primer probe reads
+```{r heterozygosity vs primer probe reads}
+ggplot()+geom_point(data=GTscore_individualSummary,aes(x=Primer.Probe.Reads,y=Heterozygosity))+
+  labs(title="Heterozygosity vs Total Reads per Sample", x="Primer Probe Reads", y="Heterozygosity")+
+  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))+
+  geom_hline(yintercept=0.3, lty="dashed")
+```
+
+
+samples with unusually high heterozygosity relative to others are candidates for contamination.  The three contaminated samples again are well outside the range of the other samples.
+
+plot heterozygosity vs genotype rate per sample
+```{r heterozygosity vs genotype rate}
+ggplot()+geom_point(data=GTscore_individualSummary,aes(x=GenotypeRate,y=Heterozygosity))+
+  labs(title="Heterozygosity vs Genotype Rate per Sample", x="Genotype Rate", y="Heterozygosity")+
+  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))
+```
+
+
+A contamination score is included in the sample summary.  The contamination score is the proportion of heterozygous genotypes whose allele ratios significantly differ from 1:1 ratios
+
+The three contaminated samples all show elevated contamination scores and heterozygosity relative to the rest of the samples.
+
+plot heterozygosity vs contamination score per sample
+```{r heterozygosity vs contamination score}
+ggplot()+geom_point(data=GTscore_individualSummary,aes(x=conScore,y=Heterozygosity))+
+  labs(title="Heterozygosity vs Contamination Score per Sample", x="Contamination Score", y="Heterozygosity")+
+  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))
+```
+
+
+
+## Locus Summaries
+
+summarize single SNP results for loci
+
+```{r}
+singleSNP_summary<-summarizeGTscore(singleSNP_alleleReads, singleSNP_locusTable, polyGenResults_singleSNP)
+
+head(singleSNP_summary)
+
+#write results
+write.table(singleSNP_summary,"singleSNP_summary.txt",quote=FALSE,sep="\t",row.names=FALSE)
+```
+
+
+
+Generate plots for single SNP results
+
+plot genotype rate
+
+```{r locus genotype rate, warning=FALSE}
+ggplot()+geom_histogram(data=singleSNP_summary,aes(x=GenotypeRate),binwidth=0.03)+xlim(-0.01,1.01)+
+  labs(title="Locus Genotype Rate", x="Genotype Rate", y="Count")+
+  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))
+```
+
+plot average read depth for single SNP data
+
+```{r locus read depth}
+ggplot()+geom_histogram(data=singleSNP_summary,aes(x=AvgReadDepth),binwidth=20)+
+  labs(title="Average Read Depth per SNP", x="Average Read Depth", y="Count")+
+  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))
+```
+
+plot genotype rate relative to average depth
+
+```{r locus genotype rate vs read depth}
+ggplot()+geom_point(data=singleSNP_summary,aes(x=AvgReadDepth,y=GenotypeRate))+ylim(0,1)+
+  labs(title="Genotype Rate vs Average Depth per SNP", x="Average Depth", y="Genotype Rate")+
+  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))
+```
+
+plot distribution of minor allele frequency
+
+```{r histogram of MAF, warning=FALSE}
+ggplot()+geom_histogram(data=singleSNP_summary,aes(x=minAF),binwidth=0.01)+
+  labs(title="Minor Allele Frequency Single SNP", x="Minor Allele Frequency", y="Count")+
+  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))
+```
+
+plot distribution of major allele frequency
+
+```{r histogram of MajAF, warning=FALSE}
+ggplot()+geom_histogram(data=singleSNP_summary,aes(x=majAF),binwidth=0.01)+
+  labs(title="Major Allele Frequency Single SNP", x="Major Allele Frequency", y="Count")+
+  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))
+```
+
+
+## Quality Control
+
+#### Identify duplicate samples
+
+The IDduplicateSamples function does all pairwise comparisons of samples and outputs two metrics:
+
+* proportionCommon - The proportion of loci that had genotypes for both samples in a pair 
+* proportionMatch  - The proportion of loci that have identical genotypes in the sample pair
+
+```{r identify duplicate samples,eval=FALSE}
+#convert missing genotypes "0" to NA
+polyGenResults_singleSNP_NA<-polyGenResults_singleSNP
+polyGenResults_singleSNP_NA[polyGenResults_singleSNP_NA=="0"]<-NA
+
+#compare all samples, for each comparison get proportion of loci that have genotypes
+#in both samples (proportionCommon) and proportion of shared loci that have identical
+#genotypes (proportionMatch).
+#Samples with a high proportionCommon and high proportionMatch are likely duplicates
+polyGenResults_dupTest<-IDduplicateSamples(polyGenResults_singleSNP_NA)
+
+write.table(polyGenResults_dupTest,"polyGenResults_dupTest.txt",quote=FALSE,sep="\t",row.names=FALSE)
+
+```
+
+```{r duplicate sample results}
+polyGenResults_dupTest<-read.delim("polyGenResults_dupTest.txt",stringsAsFactors=FALSE)
+head(polyGenResults_dupTest)
+
+```
+polyGenResults_dupTest
+
+Plot results of IDduplicateSamples
+
+I generally set thresholds of proportionMatch > 0.8 and proportionCommon > 0.75 to identify duplicate sample pairs.  The appropriate thresholds will depend on the marker set being used and the relatedness among samples.  In this plot, it is possible that individuals at the lower range of identical genotypes (~0.85) are relatives rather than duplicated samples.
+
+```{r plot IDduplicateSamples results}
+#potential duplicates are proportionMatch>0.8 and proportionCommon>0.75
+#feel free to adjust these thresholds as needed
+matchThresh=0.8
+commonThresh=0.75
+
+#plot results
+ggplot()+geom_point(data=polyGenResults_dupTest,aes(x=proportionCommon,y=proportionMatch))+
+  geom_segment(aes(x=commonThresh,xend=1,y=matchThresh,yend=matchThresh),lty="dashed")+
+  geom_segment(aes(x=commonThresh,xend=commonThresh,y=matchThresh,yend=1),lty="dashed")
+```
+
+Identify duplicate sample pairs with thresholds set previously
+
+```{r}
+#filter to potentially duplicated samples using thresholds above
+polyGenResults_dupTest %>% filter(proportionMatch>=matchThresh,proportionCommon>=commonThresh)
+
+```
+
+#### Identify contaminated samples
+
+Contaminated samples can be identified through elevated heterozygosity
+
+```{r identify contaminated samples (heterozygosity)}
+#plot heterozygosity vs genotype rate per sample
+#samples with unusually high heterozygosity relative to others are candidates for contamination
+#the sample above the dashed line in this example is likely contaminated
+ggplot()+geom_point(data=GTscore_individualSummary,aes(x=GenotypeRate,y=Heterozygosity))+
+  labs(title="Heterozygosity vs Genotype Rate per Sample", x="Genotype Rate", y="Heterozygosity")+
+  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))+
+  geom_hline(yintercept=0.30, lty="dashed")
+```
+
+Set heterozygosity treshold to identify likely contaminated sample
+
+```{r}
+#identify likely contaminated sample
+contaminatedSample<-GTscore_individualSummary %>% filter(Heterozygosity>0.30) %>% pull(Sample)
+contaminatedSample
+
+```
+
+Contaminated samples can alao be identified by an elevated contamination score.  In this example, samples with a contamination score > 0.3 are known to be contaminated.
+
+```{r }
+#plot histogram of contamination score
+ggplot()+geom_histogram(data=GTscore_individualSummary,aes(x=conScore),binwidth=0.02)+geom_vline(xintercept=0.3,lty="dashed")
+
+```
+
+Set contamination score treshold to identify contaminated samples
+
+```{r}
+#identify likely contaminated samples
+contaminatedSamples2<-GTscore_individualSummary %>% filter(conScore>=0.3) %>% pull(Sample)
+contaminatedSamples2
+
+```
+
+
+Plot genotype scatterplots for each sample
+
+```{r}
+#Scatter Plots can show evidence of contamination or elevated ploidy
+plotGenotypes_sample(singleSNP_locusTable, singleSNP_alleleReads, polyGenResults_singleSNP, type='scatter', savePlot="Y", saveDir="scatterPlots_sample")
+#look at plots for samples, particularly for putatively contaminated samples identified by high heterozygosity
+```
+
+```{r,echo = FALSE}
+library(knitr)
+```
+
+This is an example of a sample with no signs of contamination
+
+```{r, out.width = "50%", fig.pos="h", echo=FALSE}
+include_graphics("scatterPlots_sample/KAROL05_0028_scatter.jpg")
+```
+
+This is an example of a potentially moderately contaminated sample
+
+```{r, out.width = "50%", fig.pos="h", echo=FALSE}
+include_graphics("scatterPlots_sample/KGEOR05_0066_scatter.jpg")
+```
+
+This is an example of a one of the contaminated samples that we created by combining reads from two individuals
+
+```{r, out.width = "50%", fig.pos="h", echo=FALSE}
+include_graphics("scatterPlots_sample/KAROL05_0009_KAROL05_0010_scatter.jpg")
+```
+
+
+#### Identify poor quality loci to remove
+
+Flag SNPs with < 50% genotype rate as candidates for removal
+```{r}
+poorQualitySNPs<-singleSNP_summary %>% filter(GenotypeRate<0.5) %>% mutate(Locus_ID=as.character(Locus_ID)) %>% pull(Locus_ID)
+poorQualitySNPs
+```
+
+
+Scatter Plots can show evidence of systemic issues in read counting (off-target reads, biases) or elevated ploidy
+
+Plot genotype scatterplots per locus
+
+
+```{r}
+plotGenotypes(singleSNP_locusTable, singleSNP_alleleReads, polyGenResults_singleSNP, type='scatter', savePlot="Y", saveDir="scatterPlots_loci")
+```
+
+
+plot histogram of contamination score for loci.  An arbitrary score of 0.3 was set to identify problematic loci, but a lower or higher threshold may be more suitable.  Visual examinstion of loci with elevated scores is recommended.  In cases where there are very few heterozygous individuals, a high contamination score may be not truly reflect locus performance..
+```{r, warning=FALSE}
+#loci with high contamination scores should have scatterplots examined to ensure genotypes look accurate
+singleSNP_summary %>% ggplot(data=.) + geom_histogram(aes(x=conScore),binwidth=0.01)+geom_vline(xintercept=0.3)
+```
+
+Plot contamination score vs minor allele frequency.  Loci with both a high contamination score and high minor allele frequency are likely to be problematic.
+
+```{r, warning=FALSE}
+
+singleSNP_summary %>% ggplot(data=.) + geom_point(aes(x=conScore,y=minAF))
+
+
+```
+
+<!-- Get list of loci with high contamination score -->
+
+<!-- ```{r} -->
+<!-- singleSNP_summary %>% filter(conScore>0.3) -->
+<!-- ``` -->
+
+```{r}
+write.table(polyGenResults_singleSNP,"polyGenResults_singleSNP.txt",quote=FALSE,sep="\t")
+```
+
+
+Look at scatterplots for loci with high contamination score
+
+Example of a paralog
+
+```{r, out.width = "50%", fig.pos="h", echo=FALSE}
+include_graphics("scatterPlots_loci/RAD3524_86_scatter.jpg")
+```
+
+Example of a locus with with likely off-target sequence
+
+```{r, out.width = "50%", fig.pos="h", echo=FALSE}
+include_graphics("scatterPlots_loci/RAD20110_50_scatter.jpg")
+```
+
+
+Example of a locus that has high contamination score but may be fine
+
+```{r, out.width = "50%", fig.pos="h", echo=FALSE}
+include_graphics("scatterPlots_loci/Ots_crRAD24807-74_1_scatter.jpg")
+```
+
+
+
+## Export Files
+When exporting files, you can either export the full results and remove any poor quality samples or loci afterwards, or you can use whitelists or blacklists to filter during export.  Both the exportGenepop and exportRubias functions have the following options: sampleWhitelist, locusWhitelist, sampleBlacklist, locusBlacklist.  The whitelists are a list of samples or loci to retain, the blacklists are lists of samples or loci to discard.
+
+#### Genepop format
+
+export genepop format with no filtering
+```{r}
+#example with no filtering
+exportGenepop(polyGenResults_singleSNP,singleSNP_locusTable,filename="polyGenResults_singleSNP_genepop.txt")
+```
+
+export genepop format with poor quality loci and contaminated sample removed
+```{r}
+#example with poor quality loci and contaminated sample removed
+exportGenepop(polyGenResults_singleSNP,singleSNP_locusTable,
+              locusBlacklist=poorQualitySNPs,sampleBlacklist=contaminatedSample,
+              filename="polyGenResults_singleSNP_genepop_filtered.txt")
+```
+
+#### Rubias format
+
+Data output for Rubias should have metadata associated with each sample that specifies the sample type, mixture if a mixture sample, reference if a baseline sample, the reporting group, the sample collection, and individual name.
+
+Sample metadata columns should have the following names: sample_type, repunit, collection, indiv
+
+metadata can be created here or loaded from file
+
+create sample metadata for mixture sample
+```{r}
+sampleMetaData<-data.frame(sample_type="mixture",repunit=NA,collection="SSCK17P2",indiv=colnames(polyGenResults_singleSNP))
+head(sampleMetaData)
+```
+
+
+export Rubias format with no filtering
+```{r}
+exportRubias(polyGenResults_singleSNP,singleSNP_locusTable,sampleMetaData,filename="polyGenResults_singleSNP_rubias.txt")
+```
+
+export Rubias format with poor quality loci and contaminated sample removed
+
+```{r}
+exportRubias(polyGenResults_singleSNP,singleSNP_locusTable,sampleMetaData,
+             locusBlacklist=poorQualitySNPs,sampleBlacklist=contaminatedSample,
+             filename="polyGenResults_singleSNP_rubias_filtered.txt")
+```
+
+

@@ -1,0 +1,3 @@
+"0","exportRubias(polyGenResults_singleSNP,singleSNP_locusTable,sampleMetaData,"
+"0","             locusBlacklist=poorQualitySNPs,sampleBlacklist=contaminatedSample,"
+"0","             filename=""polyGenResults_singleSNP_rubias_filtered.txt"")"

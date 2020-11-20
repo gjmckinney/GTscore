@@ -1,0 +1,2 @@
+"0","#loci with high contamination scores should have scatterplots examined to ensure genotypes look accurate"
+"0","singleSNP_summary %>% ggplot(data=.) + geom_histogram(aes(x=conScore),binwidth=0.01)+geom_vline(xintercept=0.3)"

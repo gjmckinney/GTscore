@@ -1,0 +1,1 @@
+"0","GTscore_individualSummary<-merge(GTscore_individualSummary,singleSNP_sampleSummary,by.x=""Sample"",by.y=""sample"")"

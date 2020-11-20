@@ -1,0 +1,3 @@
+"0","singleSNP_summary<-summarizeGTscore(singleSNP_alleleReads, singleSNP_locusTable, polyGenResults_singleSNP)"
+"0",""
+"0","head(singleSNP_summary)"

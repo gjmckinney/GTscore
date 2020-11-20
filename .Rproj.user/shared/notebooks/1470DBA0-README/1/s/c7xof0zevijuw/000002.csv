@@ -1,0 +1,554 @@
+"0","system2(""perl"","
+"0","        args=""AmpliconReadCounter.pl -p primerProbeFile.txt --files sampleFiles.txt"")"
+"1","sample 1 finished: KEEK02_0001	Processing time: 2 seconds
+"
+"1","sample 2 finished: KEEK02_0002	Processing time: 3 seconds
+"
+"1","sample 3 finished: KEEK02_0003	Processing time: 3 seconds
+"
+"1","sample 4 finished: KEEK02_0004	Processing time: 2 seconds
+"
+"1","sample 5 finished: KEEK02_0005	Processing time: 3 seconds
+"
+"1","sample 6 finished: KEEK02_0006	Processing time: 3 seconds
+"
+"1","sample 7 finished: KEEK02_0007	Processing time: 3 seconds
+"
+"1","sample 8 finished: KEEK02_0008	Processing time: 3 seconds
+"
+"1","sample 9 finished: KEEK02_0009	Processing time: 2 seconds
+"
+"1","sample 10 finished: KEEK02_0010	Processing time: 3 seconds
+"
+"1","sample 11 finished: KEEK02_0011	Processing time: 3 seconds
+"
+"1","sample 12 finished: KEEK02_0012	Processing time: 2 seconds
+"
+"1","sample 13 finished: KEEK02_0013	Processing time: 3 seconds
+"
+"1","sample 14 finished: KEEK02_0014	Processing time: 3 seconds
+"
+"1","sample 15 finished: KEEK02_0015	Processing time: 2 seconds
+"
+"1","sample 16 finished: KEEK02_0016	Processing time: 3 seconds
+"
+"1","sample 17 finished: KEEK02_0017	Processing time: 2 seconds
+"
+"1","sample 18 finished: KEEK02_0018	Processing time: 3 seconds
+"
+"1","sample 19 finished: KEEK05_0001	Processing time: 2 seconds
+"
+"1","sample 20 finished: KEEK05_0002	Processing time: 3 seconds
+"
+"1","sample 21 finished: KEEK05_0003	Processing time: 3 seconds
+"
+"1","sample 22 finished: KEEK05_0004	Processing time: 3 seconds
+"
+"1","sample 23 finished: KEEK05_0005	Processing time: 3 seconds
+"
+"1","sample 24 finished: KEEK05_0006	Processing time: 2 seconds
+"
+"1","sample 25 finished: KSALM95_0001	Processing time: 3 seconds
+"
+"1","sample 26 finished: KSALM95_0002	Processing time: 2 seconds
+"
+"1","sample 27 finished: KSALM95_0003	Processing time: 2 seconds
+"
+"1","sample 28 finished: KSALM95_0004	Processing time: 3 seconds
+"
+"1","sample 29 finished: KSALM95_0005	Processing time: 2 seconds
+"
+"1","sample 30 finished: KSALM95_0006	Processing time: 3 seconds
+"
+"1","sample 31 finished: KSALM95_0007	Processing time: 3 seconds
+"
+"1","sample 32 finished: KSALM95_0008	Processing time: 2 seconds
+"
+"1","sample 33 finished: KSALM95_0009	Processing time: 3 seconds
+"
+"1","sample 34 finished: KSALM95_0010	Processing time: 3 seconds
+"
+"1","sample 35 finished: KSALM95_0011	Processing time: 2 seconds
+"
+"1","sample 36 finished: KSALM95_0012	Processing time: 2 seconds
+"
+"1","sample 37 finished: KSALM95_0013	Processing time: 2 seconds
+"
+"1","sample 38 finished: KSALM95_0014	Processing time: 2 seconds
+"
+"1","sample 39 finished: KSALM95_0015	Processing time: 3 seconds
+"
+"1","sample 40 finished: KSALM95_0016	Processing time: 3 seconds
+"
+"1","sample 41 finished: KSALM95_0017	Processing time: 2 seconds
+"
+"1","sample 42 finished: KSALM95_0018	Processing time: 2 seconds
+"
+"1","sample 43 finished: KSALM95_0019	Processing time: 2 seconds
+"
+"1","sample 44 finished: KSALM95_0020	Processing time: 2 seconds
+"
+"1","sample 45 finished: KSALM95_0021	Processing time: 3 seconds
+"
+"1","sample 46 finished: KSALM95_0022	Processing time: 2 seconds
+"
+"1","sample 47 finished: KSALM95_0023	Processing time: 2 seconds
+"
+"1","sample 48 finished: KSALM95_0024	Processing time: 2 seconds
+"
+"1","sample 49 finished: KTAKW07_0001	Processing time: 3 seconds
+"
+"1","sample 50 finished: KTAKW07_0002	Processing time: 3 seconds
+"
+"1","sample 51 finished: KTAKW07_0003	Processing time: 2 seconds
+"
+"1","sample 52 finished: KTAKW07_0004	Processing time: 2 seconds
+"
+"1","sample 53 finished: KTAKW07_0005	Processing time: 2 seconds
+"
+"1","sample 54 finished: KTAKW07_0006	Processing time: 2 seconds
+"
+"1","sample 55 finished: KTAKW07_0007	Processing time: 3 seconds
+"
+"1","sample 56 finished: KTAKW07_0008	Processing time: 2 seconds
+"
+"1","sample 57 finished: KTAKW07_0009	Processing time: 2 seconds
+"
+"1","sample 58 finished: KTAKW07_0010	Processing time: 2 seconds
+"
+"1","sample 59 finished: KTAKW07_0011	Processing time: 2 seconds
+"
+"1","sample 60 finished: KTAKW07_0012	Processing time: 2 seconds
+"
+"1","sample 61 finished: KTAKW07_0013	Processing time: 3 seconds
+"
+"1","sample 62 finished: KTAKW07_0014	Processing time: 3 seconds
+"
+"1","sample 63 finished: KTAKW07_0015	Processing time: 2 seconds
+"
+"1","sample 64 finished: KTAKW07_0016	Processing time: 2 seconds
+"
+"1","sample 65 finished: KTAKW07_0017	Processing time: 2 seconds
+"
+"1","sample 66 finished: KTAKW07_0018	Processing time: 3 seconds
+"
+"1","sample 67 finished: KTAKW07_0019	Processing time: 3 seconds
+"
+"1","sample 68 finished: KTAKW07_0020	Processing time: 2 seconds
+"
+"1","sample 69 finished: KTAKW07_0021	Processing time: 2 seconds
+"
+"1","sample 70 finished: KTAKW07_0022	Processing time: 3 seconds
+"
+"1","sample 71 finished: KTAKW07_0023	Processing time: 3 seconds
+"
+"1","sample 72 finished: KTAKW07_0024	Processing time: 2 seconds
+"
+"1","sample 73 finished: KTATL05_0001	Processing time: 2 seconds
+"
+"1","sample 74 finished: KTATL05_0002	Processing time: 3 seconds
+"
+"1","sample 75 finished: KTATL05_0003	Processing time: 2 seconds
+"
+"1","sample 76 finished: KTATL05_0004	Processing time: 3 seconds
+"
+"1","sample 77 finished: KTATL05_0005	Processing time: 2 seconds
+"
+"1","sample 78 finished: KTATL05_0006	Processing time: 3 seconds
+"
+"1","sample 79 finished: KTATL05_0007	Processing time: 2 seconds
+"
+"1","sample 80 finished: KTATL05_0008	Processing time: 3 seconds
+"
+"1","sample 81 finished: KTATL05_0009	Processing time: 2 seconds
+"
+"1","sample 82 finished: KTATL05_0010	Processing time: 2 seconds
+"
+"1","sample 83 finished: KTATL05_0011	Processing time: 3 seconds
+"
+"1","sample 84 finished: KTATL05_0012	Processing time: 2 seconds
+"
+"1","sample 85 finished: KTATL05_0013	Processing time: 3 seconds
+"
+"1","sample 86 finished: KTATL05_0014	Processing time: 2 seconds
+"
+"1","sample 87 finished: KTATL05_0015	Processing time: 3 seconds
+"
+"1","sample 88 finished: KTATL05_0016	Processing time: 2 seconds
+"
+"1","sample 89 finished: KTATL05_0017	Processing time: 2 seconds
+"
+"1","sample 90 finished: KTATL05_0018	Processing time: 3 seconds
+"
+"1","sample 91 finished: KTATL05_0019	Processing time: 2 seconds
+"
+"1","sample 92 finished: KTATL05_0020	Processing time: 2 seconds
+"
+"1","sample 93 finished: KTATL05_0021	Processing time: 2 seconds
+"
+"1","sample 94 finished: KTATL05_0022	Processing time: 3 seconds
+"
+"1","sample 95 finished: KTATL05_0023	Processing time: 2 seconds
+"
+"1","sample 96 finished: KTATL05_0024	Processing time: 3 seconds
+"
+"1","sample 97 finished: KAROL05_0009	Processing time: 2 seconds
+"
+"1","sample 98 finished: KAROL05_0010	Processing time: 2 seconds
+"
+"1","sample 99 finished: KAROL05_0025	Processing time: 3 seconds
+"
+"1","sample 100 finished: KAROL05_0026	Processing time: 3 seconds
+"
+"1","sample 101 finished: KAROL05_0028	Processing time: 2 seconds
+"
+"1","sample 102 finished: KAROL05_0029	Processing time: 3 seconds
+"
+"1","sample 103 finished: KAROL05_0034	Processing time: 3 seconds
+"
+"1","sample 104 finished: KAROL05_0037	Processing time: 3 seconds
+"
+"1","sample 105 finished: KAROL05_0038	Processing time: 2 seconds
+"
+"1","sample 106 finished: KAROL05_0041	Processing time: 2 seconds
+"
+"1","sample 107 finished: KAROL05_0042	Processing time: 2 seconds
+"
+"1","sample 108 finished: KAROL05_0044	Processing time: 3 seconds
+"
+"1","sample 109 finished: KAROL05_0045	Processing time: 2 seconds
+"
+"1","sample 110 finished: KAROL05_0046	Processing time: 3 seconds
+"
+"1","sample 111 finished: KAROL05_0047	Processing time: 3 seconds
+"
+"1","sample 112 finished: KAROL05_0049	Processing time: 2 seconds
+"
+"1","sample 113 finished: KAROL05_0050	Processing time: 2 seconds
+"
+"1","sample 114 finished: KAROL05_0055	Processing time: 2 seconds
+"
+"1","sample 115 finished: KAROL05_0057	Processing time: 2 seconds
+"
+"1","sample 116 finished: KAROL05_0058	Processing time: 3 seconds
+"
+"1","sample 117 finished: KAROL05_0059	Processing time: 2 seconds
+"
+"1","sample 118 finished: KAROL05_0061	Processing time: 2 seconds
+"
+"1","sample 119 finished: KAROL05_0062	Processing time: 3 seconds
+"
+"1","sample 120 finished: KAROL05_0070	Processing time: 2 seconds
+"
+"1","sample 121 finished: KAROL05_0073	Processing time: 3 seconds
+"
+"1","sample 122 finished: KAROL05_0074	Processing time: 2 seconds
+"
+"1","sample 123 finished: KAROL05_0075	Processing time: 1 seconds
+"
+"1","sample 124 finished: KAROL05_0076	Processing time: 3 seconds
+"
+"1","sample 125 finished: KAROL05_0077	Processing time: 2 seconds
+"
+"1","sample 126 finished: KAROL05_0078	Processing time: 2 seconds
+"
+"1","sample 127 finished: KAROL05_0079	Processing time: 3 seconds
+"
+"1","sample 128 finished: KAROL05_0080	Processing time: 2 seconds
+"
+"1","sample 129 finished: KAROL05_0081	Processing time: 2 seconds
+"
+"1","sample 130 finished: KAROL05_0082	Processing time: 3 seconds
+"
+"1","sample 131 finished: KAROL05_0083	Processing time: 2 seconds
+"
+"1","sample 132 finished: KAROL05_0084	Processing time: 2 seconds
+"
+"1","sample 133 finished: KAROL05_0085	Processing time: 3 seconds
+"
+"1","sample 134 finished: KAROL05_0086	Processing time: 2 seconds
+"
+"1","sample 135 finished: KAROL05_0087	Processing time: 2 seconds
+"
+"1","sample 136 finished: KAROL05_0088	Processing time: 2 seconds
+"
+"1","sample 137 finished: KAROL05_0089	Processing time: 2 seconds
+"
+"1","sample 138 finished: KAROL05_0090	Processing time: 2 seconds
+"
+"1","sample 139 finished: KAROL05_0091	Processing time: 3 seconds
+"
+"1","sample 140 finished: KAROL05_0092	Processing time: 2 seconds
+"
+"1","sample 141 finished: KAROL05_0093	Processing time: 3 seconds
+"
+"1","sample 142 finished: KAROL05_0094	Processing time: 2 seconds
+"
+"1","sample 143 finished: KAROL05_0095	Processing time: 3 seconds
+"
+"1","sample 144 finished: KGEOR05_0053	Processing time: 1 seconds
+"
+"1","sample 145 finished: KGEOR05_0054	Processing time: 2 seconds
+"
+"1","sample 146 finished: KGEOR05_0057	Processing time: 2 seconds
+"
+"1","sample 147 finished: KGEOR05_0060	Processing time: 3 seconds
+"
+"1","sample 148 finished: KGEOR05_0061	Processing time: 2 seconds
+"
+"1","sample 149 finished: KGEOR05_0062	Processing time: 2 seconds
+"
+"1","sample 150 finished: KGEOR05_0063	Processing time: 3 seconds
+"
+"1","sample 151 finished: KGEOR05_0065	Processing time: 2 seconds
+"
+"1","sample 152 finished: KGEOR05_0066	Processing time: 2 seconds
+"
+"1","sample 153 finished: KGEOR05_0071	Processing time: 3 seconds
+"
+"1","sample 154 finished: KGEOR05_0072	Processing time: 2 seconds
+"
+"1","sample 155 finished: KGEOR05_0075	Processing time: 2 seconds
+"
+"1","sample 156 finished: KGEOR05_0079	Processing time: 3 seconds
+"
+"1","sample 157 finished: KGEOR05_0080	Processing time: 2 seconds
+"
+"1","sample 158 finished: KGEOR05_0081	Processing time: 3 seconds
+"
+"1","sample 159 finished: KGEOR05_0082	Processing time: 2 seconds
+"
+"1","sample 160 finished: KGEOR05_0083	Processing time: 3 seconds
+"
+"1","sample 161 finished: KGEOR05_0085	Processing time: 2 seconds
+"
+"1","sample 162 finished: KGEOR05_0087	Processing time: 2 seconds
+"
+"1","sample 163 finished: KGEOR05_0089	Processing time: 2 seconds
+"
+"1","sample 164 finished: KGEOR05_0090	Processing time: 2 seconds
+"
+"1","sample 165 finished: KGEOR05_0092	Processing time: 3 seconds
+"
+"1","sample 166 finished: KGEOR05_0093	Processing time: 3 seconds
+"
+"1","sample 167 finished: KGEOR05_0095	Processing time: 2 seconds
+"
+"1","sample 168 finished: KGEOR05_0096	Processing time: 2 seconds
+"
+"1","sample 169 finished: KGEOR05_0098	Processing time: 2 seconds
+"
+"1","sample 170 finished: KGEOR05_0099	Processing time: 2 seconds
+"
+"1","sample 171 finished: KGEOR05_0701	Processing time: 3 seconds
+"
+"1","sample 172 finished: KGEOR05_0708	Processing time: 3 seconds
+"
+"1","sample 173 finished: KGEOR05_0711	Processing time: 2 seconds
+"
+"1","sample 174 finished: KGEOR05_0712	Processing time: 4 seconds
+"
+"1","sample 175 finished: KGEOR05_0714	Processing time: 2 seconds
+"
+"1","sample 176 finished: KGEOR05_0716	Processing time: 1 seconds
+"
+"1","sample 177 finished: KGEOR05_0718	Processing time: 3 seconds
+"
+"1","sample 178 finished: KGEOR05_0720	Processing time: 2 seconds
+"
+"1","sample 179 finished: KGEOR05_0721	Processing time: 2 seconds
+"
+"1","sample 180 finished: KGEOR05_0723	Processing time: 3 seconds
+"
+"1","sample 181 finished: KGEOR05_0725	Processing time: 2 seconds
+"
+"1","sample 182 finished: KGEOR05_0727	Processing time: 3 seconds
+"
+"1","sample 183 finished: KGEOR05_0728	Processing time: 2 seconds
+"
+"1","sample 184 finished: KGEOR05_0732	Processing time: 2 seconds
+"
+"1","sample 185 finished: KGONF06_0001	Processing time: 2 seconds
+"
+"1","sample 186 finished: KGONF06_0002	Processing time: 3 seconds
+"
+"1","sample 187 finished: KGONF06_0008	Processing time: 2 seconds
+"
+"1","sample 188 finished: KGONF06_0012	Processing time: 3 seconds
+"
+"1","sample 189 finished: KGONF06_0015	Processing time: 2 seconds
+"
+"1","sample 190 finished: KGONF06_0021	Processing time: 2 seconds
+"
+"1","sample 191 finished: KGONF06_0022	Processing time: 3 seconds
+"
+"1","sample 192 finished: KGONF06_0023	Processing time: 2 seconds
+"
+"1","sample 193 finished: KGONF06_0024	Processing time: 2 seconds
+"
+"1","sample 194 finished: KGONF06_0025	Processing time: 3 seconds
+"
+"1","sample 195 finished: KGONF06_0026	Processing time: 2 seconds
+"
+"1","sample 196 finished: KGONF06_0027	Processing time: 2 seconds
+"
+"1","sample 197 finished: KGONF06_0028	Processing time: 2 seconds
+"
+"1","sample 198 finished: KGONF06_0029	Processing time: 2 seconds
+"
+"1","sample 199 finished: KGONF06_0030	Processing time: 2 seconds
+"
+"1","sample 200 finished: KGONF06_0033	Processing time: 2 seconds
+"
+"1","sample 201 finished: KGONF06_0041	Processing time: 2 seconds
+"
+"1","sample 202 finished: KGONF06_0065	Processing time: 2 seconds
+"
+"1","sample 203 finished: KGONF06_0066	Processing time: 2 seconds
+"
+"1","sample 204 finished: KGONF06_0067	Processing time: 2 seconds
+"
+"1","sample 205 finished: KGONF06_0068	Processing time: 2 seconds
+"
+"1","sample 206 finished: KGONF06_0069	Processing time: 2 seconds
+"
+"1","sample 207 finished: KGONF06_0070	Processing time: 2 seconds
+"
+"1","sample 208 finished: KGONF06_0071	Processing time: 2 seconds
+"
+"1","sample 209 finished: KGONF06_0072	Processing time: 3 seconds
+"
+"1","sample 210 finished: KGONF06_0073	Processing time: 1 seconds
+"
+"1","sample 211 finished: KGONF06_0074	Processing time: 3 seconds
+"
+"1","sample 212 finished: KGONF06_0075	Processing time: 2 seconds
+"
+"1","sample 213 finished: KGONF06_0076	Processing time: 2 seconds
+"
+"1","sample 214 finished: KGONF06_0077	Processing time: 2 seconds
+"
+"1","sample 215 finished: KGONF06_0078	Processing time: 3 seconds
+"
+"1","sample 216 finished: KGONF06_0079	Processing time: 2 seconds
+"
+"1","sample 217 finished: KGONF06_0080	Processing time: 2 seconds
+"
+"1","sample 218 finished: KGONF06_0081	Processing time: 2 seconds
+"
+"1","sample 219 finished: KGONF06_0082	Processing time: 3 seconds
+"
+"1","sample 220 finished: KGONF06_0083	Processing time: 2 seconds
+"
+"1","sample 221 finished: KGONF06_0084	Processing time: 2 seconds
+"
+"1","sample 222 finished: KGONF06_0085	Processing time: 2 seconds
+"
+"1","sample 223 finished: KGONF06_0086	Processing time: 3 seconds
+"
+"1","sample 224 finished: KGONF06_0087	Processing time: 2 seconds
+"
+"1","sample 225 finished: KGONF06_0088	Processing time: 2 seconds
+"
+"1","sample 226 finished: KGONF06_0089	Processing time: 2 seconds
+"
+"1","sample 227 finished: KGONF06_0090	Processing time: 2 seconds
+"
+"1","sample 228 finished: KGONF06_0091	Processing time: 2 seconds
+"
+"1","sample 229 finished: KGONF06_0092	Processing time: 2 seconds
+"
+"1","sample 230 finished: KGONF06_0093	Processing time: 2 seconds
+"
+"1","sample 231 finished: KGONF06_0094	Processing time: 3 seconds
+"
+"1","sample 232 finished: KGONF06_0095	Processing time: 2 seconds
+"
+"1","sample 233 finished: KGEOR05_0734	Processing time: 2 seconds
+"
+"1","sample 234 finished: KGEOR05_0735	Processing time: 2 seconds
+"
+"1","sample 235 finished: KGEOR05_0741	Processing time: 2 seconds
+"
+"1","sample 236 finished: KGEOR05_0747	Processing time: 2 seconds
+"
+"1","sample 237 finished: KGEOR05_0748	Processing time: 2 seconds
+"
+"1","sample 238 finished: KGEOR05_0749	Processing time: 2 seconds
+"
+"1","sample 239 finished: KGEOR05_0750	Processing time: 2 seconds
+"
+"1","sample 240 finished: KGEOR05_0704	Processing time: 3 seconds
+"
+"1","sample 241 finished: KIOW10_0001	Processing time: 2 seconds
+"
+"1","sample 242 finished: KIOW10_0007	Processing time: 2 seconds
+"
+"1","sample 243 finished: KIOW10_0008	Processing time: 1 seconds
+"
+"1","sample 244 finished: KIOW10_0009	Processing time: 2 seconds
+"
+"1","sample 245 finished: KIOW10_0015	Processing time: 2 seconds
+"
+"1","sample 246 finished: KIOW10_0017	Processing time: 2 seconds
+"
+"1","sample 247 finished: KIOW10_0024	Processing time: 2 seconds
+"
+"1","sample 248 finished: KIOW10_0025	Processing time: 2 seconds
+"
+"1","sample 249 finished: KIOW10_0033	Processing time: 2 seconds
+"
+"1","sample 250 finished: KIOW10_0040	Processing time: 2 seconds
+"
+"1","sample 251 finished: KIOW10_0041	Processing time: 2 seconds
+"
+"1","sample 252 finished: KIOW10_0049	Processing time: 2 seconds
+"
+"1","sample 253 finished: KIOW10_0061	Processing time: 2 seconds
+"
+"1","sample 254 finished: KIOW10_0062	Processing time: 2 seconds
+"
+"1","sample 255 finished: KIOW10_0063	Processing time: 2 seconds
+"
+"1","sample 256 finished: KIOW10_0064	Processing time: 2 seconds
+"
+"1","sample 257 finished: KIOW10_0065	Processing time: 2 seconds
+"
+"1","sample 258 finished: KIOW10_0066	Processing time: 2 seconds
+"
+"1","sample 259 finished: KIOW13_0001	Processing time: 2 seconds
+"
+"1","sample 260 finished: KIOW13_0002	Processing time: 2 seconds
+"
+"1","sample 261 finished: KIOW13_0003	Processing time: 2 seconds
+"
+"1","sample 262 finished: KIOW13_0004	Processing time: 2 seconds
+"
+"1","sample 263 finished: KIOW13_0005	Processing time: 2 seconds
+"
+"1","sample 264 finished: KIOW13_0006	Processing time: 2 seconds
+"
+"1","sample 265 finished: KIOW13_0007	Processing time: 2 seconds
+"
+"1","sample 266 finished: KIOW13_0008	Processing time: 2 seconds
+"
+"1","sample 267 finished: KIOW13_0009	Processing time: 2 seconds
+"
+"1","sample 268 finished: KIOW13_0010	Processing time: 2 seconds
+"
+"1","sample 269 finished: KIOW13_0011	Processing time: 3 seconds
+"
+"1","sample 270 finished: KIOW13_0012	Processing time: 2 seconds
+"
+"1","sample 271 finished: KIOW13_0013	Processing time: 2 seconds
+"
+"1","sample 272 finished: KIOW13_0014	Processing time: 2 seconds
+"
+"1","sample 273 finished: KAROL05_0009_KAROL05_0010	Processing time: 4 seconds
+"
+"1","sample 274 finished: KAROL05_0025_KAROL05_0026	Processing time: 3 seconds
+"
+"1","sample 275 finished: KAROL05_0028_KAROL05_0029	Processing time: 4 seconds
+"
+"1","Total Time: 647
+"

@@ -1,0 +1,137 @@
+#new polygen
+#PolyGen is broken into two functions
+#The first function (polyGen) combines the locus table and read counts into a single file and submits to the second function
+#The second funtion (genoSetup) genotypes the data and returns the final genotypes to polyGen where it undergoes final formatting
+polyGen<-function(locusTable,readCounts,p_thresh=0.05,epsilon=0.01){
+  #remove correction factor column from locusTable (if present)
+  if("correctionFactors" %in% colnames(locusTable)){
+    locusTable<-locusTable %>% select(-correctionFactors)
+  }
+  
+  #combine locus information and read counts into single table
+  combinedData<-cbind(locusTable,readCounts)
+  #pbapply has integrated progress bar, use apply if pbapply cannot be installed
+  results<-pbapply(combinedData,1,genoSetup,epsilon,p_thresh)
+  #results<-pbapply(combinedData,1,genoSetup,epsilon=0.01)
+  #results<-apply(combinedData,1,genoSetup,epsilon=0.01)
+  results<-t(results)
+  return(results)
+}
+
+
+testReads<-singleSNP_alleleReads[rownames(singleSNP_alleleReads)=="RAD3524_86",]
+testLocusTable<-singleSNP_locusTable[singleSNP_locusTable$Locus_ID=="RAD3524_86",]
+
+genoData<-cbind(testLocusTable,testReads)
+
+
+genoSetup<-function(genoData,epsilon=0.01,p_thresh=0.05){
+  readList<-genoData[4:length(genoData)]
+  n_alleles<-strsplit(as.character(genoData[3]),",")
+  n_alleles<-length(n_alleles[[1]])
+  #use numbers in place of actual alleles to allow haplotypes and other allele coding (indel, etc)
+  #convert back to actual alleles later
+  alleles=as.character(seq(1:n_alleles))
+  ploidy=as.numeric(genoData[2])
+  #ploidy=2
+  #set up possible genotypes
+  alleleList<-substr(alleles,1,n_alleles)
+  alleleList<-replicate(ploidy, alleleList) 
+  #convert to vector, then sort numerically and convert back to text
+  alleleList<-as.vector(alleleList)    
+  alleleList<-sort(as.numeric(alleleList))
+  alleleList<-as.character(alleleList)
+  genoCombos<-combn(alleleList,ploidy)
+  #print(genoCombos)
+  GenotypeList<-t(genoCombos)
+  possibleGenotypes<-unique(GenotypeList)
+  
+  #make conversion table for genotypes
+  realAlleles<-genoData[3]
+  realAllelesOrder<-unlist(strsplit(as.character(realAlleles),",",perl=TRUE))
+  
+  #make table to convert numeric genotype codes to real genotypes
+  numericGeno<-apply(possibleGenotypes,1,function(x) paste(x,collapse=","))
+  realGenotypes<-apply(possibleGenotypes,2,function(x) realAllelesOrder[as.numeric(x)])
+  realGeno<-apply(realGenotypes,1,function(x) paste(x,collapse=","))
+  genoConvert<-as.data.frame(t(rbind(numericGeno,realGeno)))
+  
+  #function to generate allele dosage for each genotype
+  generateDosage<-function(genos){
+    
+    #split genotype into each allele for dosage assignment
+    genoAlleles<-str_split(genos,",",simplify=TRUE)
+    
+    #function to count number of times each possible allele is present in each possible genotype
+    genoDosage<-function(singleGeno){
+      #test vector of all possible alleles to see which allele matches the genotype
+      #do this individually for each allele in the genotype
+      matches<-t(sapply(singleGeno,function(x) as.numeric(alleles==x)))
+      #sum vector of possible allele matches for each allele in genotype
+      #this gives count of each possible allele in the genotype being tested
+      matches<-apply(matches,2,function(x) sum(x))
+      return(matches)
+    }
+    
+    #count number of times each possible allele is present in each possible genotype
+    genoMatches<-t(apply(genoAlleles,1,genoDosage))
+    #divide count matrix by ploidy to get relative dosage of each allele
+    dosage<-genoMatches/ploidy
+    return(dosage)
+  }
+  
+  relative_dosage<-generateDosage(numericGeno)
+  
+  #make matrix of read chances
+  read_chances<-matrix(NA,nrow=1,ncol=ploidy)
+  #read_chances<-(relative_dosage*(1-epsilon) + (1-relative_dosage)*epsilon)
+  #updated error model dividing epsilon by 3 (n alleles -1) where n alleles is the number of possible bases (4, ATCG)
+  read_chances<-(relative_dosage*(1-epsilon) + (1-relative_dosage)*epsilon/3)
+  
+  #make likelihood function
+  likelihoodFunc<-function(reads){
+    #convert reads to alleles
+    #parse allele counts
+    if(reads=="."){
+      reads<-paste(as.character(replicate(n_alleles, 0)),collapse=",")
+    }
+    alleleCounts<-as.numeric(unlist(strsplit(reads,",")))
+    initLikelihood<-log(1)
+    likelihoodMatrix<-matrix(0,nrow=dim(possibleGenotypes)[1],ncol=ploidy)
+    #likelihood calculation
+    likelihoodMatrix<-t(initLikelihood+log(t(read_chances))*(alleleCounts))
+    likelihood<-apply(likelihoodMatrix,1,sum)
+    #genotypes<-apply(possibleGenotypes,1,function(x) paste(x,collapse=""))
+    genotypes<-apply(possibleGenotypes,1,function(x) paste(x,collapse=",")) #this is original for reference
+    
+    #create likelihood results matrix
+    like_of_geno<-as.data.frame(matrix(NA,nrow=dim(possibleGenotypes)[1],ncol=2))
+    colnames(like_of_geno)<-c("genotype","likelihood")
+    like_of_geno$genotype<-genotypes
+    like_of_geno$likelihood<-likelihood
+    
+    #print(like_of_geno)
+    
+    #use a likelihood ratio test to determine the support for the 'best' genotype
+    #order likelihoods
+    geno_likes<-like_of_geno[order(-like_of_geno$likelihood),]
+    #rename rows so they can be extracted in correct order
+    rownames(geno_likes)<-1:nrow(geno_likes)
+    #compare likelihood ratio of two most likely models
+    LR<-2*(geno_likes[1,2]-geno_likes[2,2])
+    #get p-value of likelihood ratio
+    p<-1-pchisq(LR, 1)
+    #if(p<0.05){
+    if(p<p_thresh){
+      genoResult<-geno_likes[1,1]
+      genoResult<-genoConvert$realGeno[genoConvert$numericGeno==genoResult]
+    }else{
+      genoResult<-"0"
+    }
+    result<-as.character(genoResult)
+    return(result)
+  }
+  
+  likelihoods<-sapply(readList,likelihoodFunc)
+  return(likelihoods)
+}

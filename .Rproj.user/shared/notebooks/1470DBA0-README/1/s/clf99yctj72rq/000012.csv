@@ -1,0 +1,8 @@
+"0","#load GTscore"
+"0","source(""GTscore.R"")"
+"0",""
+"0","#load locus table and allele reads file"
+"0","singleSNP_locusTable<-read.delim(""LocusTable_singleSNPs.txt"",header=TRUE,stringsAsFactors=FALSE)"
+"0","singleSNP_alleleReads<-read.delim(""AlleleReads_singleSNPs.txt"",header=TRUE,row.names=1,stringsAsFactors=FALSE)"
+"0",""
+"0","head(singleSNP_locusTable)"
