@@ -183,7 +183,7 @@ head(GTscore_individualSummary)
 summarize single SNP results for samples
 
 ``` r
-singleSNP_sampleSummary<-summarizeSamples(polyGenResults_singleSNP)
+singleSNP_sampleSummary<-summarizeSamples(polyGenResults_singleSNP,singleSNP_alleleReads)
 head(singleSNP_sampleSummary)
 ```
 

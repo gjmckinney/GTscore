@@ -1,0 +1,2 @@
+"0","singleSNP_sampleSummary<-summarizeSamples(polyGenResults_singleSNP,singleSNP_alleleReads)"
+"0","head(singleSNP_sampleSummary)"
