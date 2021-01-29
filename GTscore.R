@@ -539,6 +539,7 @@ summarizeMismatches<-function(mismatchData,saveDir){
 
 #Generate alignments of reference sequences, amplified sequences, primers, and probes
 require(msa)
+require(Biostrings)
 library(tools)
 #library(plyr)
 library(utils)
@@ -678,7 +679,7 @@ alignMatchedSeqs<-function(referenceSeqs=NULL,primerProbes,matchedReads,minReads
 ########################################################################
 
 #summarize sample genotype rate and heterozygosity
-summarizeSamples<-function(genotypes){
+summarizeSamples<-function(genotypes, alleleReads){
 	#missing genotypes are coded as 0
 	#calculate genotype rate as proportion of non-zero genotypes for each locus
 	genotypeRate_results<-apply(genotypes,2,function(x){(length(x)-sum(x=="0"))/length(x)})
@@ -734,11 +735,11 @@ summarizeSamples<-function(genotypes){
 	}
 
 	#make matrix where heterozygous genotypes are 1 and homozygous genotypes are 0
-	hetMatrix<-apply(polyGenResults_singleSNP,2,function(x){idHets(x)})
+	hetMatrix<-apply(genotypes,2,function(x){idHets(x)})
 
 	#split reads into allele 1 and allele 2
-	allele1<-apply(singleSNP_alleleReads,2,function(x) as.numeric(str_split_fixed(x,",",2)[,1]))
-	allele2<-apply(singleSNP_alleleReads,2,function(x) as.numeric(str_split_fixed(x,",",2)[,2]))
+	allele1<-apply(alleleReads,2,function(x) as.numeric(str_split_fixed(x,",",2)[,1]))
+	allele2<-apply(alleleReads,2,function(x) as.numeric(str_split_fixed(x,",",2)[,2]))
 
 	#multiply by het matrix to keep only counts from heterozygous genotypes
 	allele1HetCounts<-allele1*hetMatrix
@@ -813,7 +814,13 @@ plotGenotypes_sample_setup<-function(genoData,type,savePlot,saveDir){
   genoAllele_1<-str_split_fixed(genotypes,",",2)[,1]
   genoAllele_2<-str_split_fixed(genotypes,",",2)[,2]
   hetGenos<-genoAllele_1==genoAllele_2
+  #assign NA to no-call genotypes, otherwise these are counted as homozygous
+  hetGenos[genotypes=="0"]<-NA
+  hetGenos[genotypes=="00"]<-NA
+  #multiply results by 1 to convert true false to numeric
   hetGenos<-hetGenos*1
+  #convert NA to no-call to allow plotting of samples with no called genotypes
+  hetGenos[is.na(hetGenos)]<-"no-call"
   
   #split reads by allele
   alleleReads_1<-str_split_fixed(alleleReads,",",2)[,1]
@@ -1044,18 +1051,20 @@ campbellType<-function(readData){
   #use TRUE as catch-all statement at end of case_when to replace unmatched conditions with the original value "00
   genoData<-genoData %>% mutate(geno=case_when((allele1Count+allele2Count)<10 ~ "00",
                                                ratio >= 10 ~ A1hom,
+											   ratio <10 & ratio > 5 ~ "00",
                                                ratio <= 0.1 ~ A2hom,
-                                               ratio <= 0.2 ~ "00",
-                                               ratio <= 5 ~ Het,
+                                               ratio <= 0.5 ~ "00",
+                                               ratio <= 2 ~ Het,
                                                TRUE ~ .$geno))
   
   #initialize genotype classification as NA
   genoData$genoClass="NA"
   genoData<-genoData %>% mutate(genoClass=case_when((allele1Count+allele2Count)<10 ~ "NA",
                                                     ratio >= 10 ~ "A1HOM",
+													ratio <10 & ratio > 5 ~ "00",
                                                     ratio <= 0.1 ~ "A2HOM",
-                                                    ratio <= 0.2 ~ "in-betweeners",
-                                                    ratio <= 5 ~ "HET"))
+                                                    ratio <= 0.5 ~ "in-betweeners",
+                                                    ratio <= 2 ~ "HET"))
   #return(genoData$ratio)
   return(genoData$geno)
   #return(genoData$allele1Count)
