@@ -1,0 +1,3 @@
+"0","ggplot()+geom_histogram(data=singleSNP_summary,aes(x=minAF),binwidth=0.01)+"
+"0","  labs(title=""Minor Allele Frequency Single SNP"", x=""Minor Allele Frequency"", y=""Count"")+"
+"0","  theme_bw()+theme(plot.title=element_text(hjust=0.5),plot.subtitle=element_text(hjust=0.5))"

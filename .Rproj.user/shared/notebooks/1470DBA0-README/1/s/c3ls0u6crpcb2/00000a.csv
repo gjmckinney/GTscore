@@ -1,0 +1,3 @@
+"0",""
+"0","#write results"
+"0","write.table(singleSNP_summary,""singleSNP_summary.txt"",quote=FALSE,sep=""\t"",row.names=FALSE)"

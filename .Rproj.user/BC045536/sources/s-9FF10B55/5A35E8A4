@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1605803531928.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1553767593",
+    "id" : "5A35E8A4",
+    "lastKnownWriteTime" : 1643404731,
+    "last_content_update" : 1643475641560,
+    "path" : "D:/GitHub/GTscore/README.Rmd",
+    "project_path" : "README.Rmd",
+    "properties" : {
+        "cursorPosition" : "140,44",
+        "last_setup_crc32" : "",
+        "scrollLine" : "137"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

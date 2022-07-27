@@ -122,6 +122,32 @@ singleSNP_alleleReads[1:5,1:5]
     ## Ots_102213-210_1        0,15         4,7        0,12         0,9         0,9
     ## Ots_102414-395_1        16,0        0,10         9,6         3,3        0,16
 
+## Adjusting Read Counts
+
+This step is optional and requires that read correction factors were
+included in the primer probe file. Some loci may have alleles that
+amplify unevenly which can result in allele ratios deviating from
+expectations. This can be due to allele-specific differences in
+amplification efficiency, amplification of off-target sequence that is
+counted towards one allele but not the other, or if the locus is a
+diverged duplicate (tetraploid but inherited disomically, and only one
+copy has a variant SNP).
+
+One method of dealing with this is to adjust the read counts to account
+for this uneven amplification and bring the allele reads back to
+expected ratios. GTscore uses the same read adjustment method as the
+GT-seq pipeline by Nate Campbell (<https://github.com/GTseq>). If
+off-target sequence is causing the bias then I suggest redesigning the
+bioinformatic probes whenever possible rather than relying on read count
+adjustment.
+
+``` r
+singleSNP_alleleReads_adjusted<-correctReads(singleSNP_locusTable,singleSNP_alleleReads)
+
+#write to file
+write.table(singleSNP_alleleReads_adjusted,"singleSNP_alleleReads_adjusted.txt",quote=FALSE,sep="\t")
+```
+
 ## Genotyping
 
 Genotyping is accomplished using the polyGen function. The genotyping
@@ -502,7 +528,7 @@ known to be contaminated.
 ggplot()+geom_histogram(data=GTscore_individualSummary,aes(x=conScore),binwidth=0.02)+geom_vline(xintercept=0.3,lty="dashed")
 ```
 
-![](tools/unnamed-chunk-8-1.png)<!-- -->
+![](tools/unnamed-chunk-9-1.png)<!-- -->
 
 Set contamination score treshold to identify contaminated samples
 
@@ -568,7 +594,7 @@ performance..
 singleSNP_summary %>% ggplot(data=.) + geom_histogram(aes(x=conScore),binwidth=0.01)+geom_vline(xintercept=0.3)
 ```
 
-![](tools/unnamed-chunk-17-1.png)<!-- -->
+![](tools/unnamed-chunk-18-1.png)<!-- -->
 
 Plot contamination score vs minor allele frequency. Loci with both a
 high contamination score and high minor allele frequency are likely to
@@ -578,7 +604,7 @@ be problematic.
 singleSNP_summary %>% ggplot(data=.) + geom_point(aes(x=conScore,y=minAF))
 ```
 
-![](tools/unnamed-chunk-18-1.png)<!-- -->
+![](tools/unnamed-chunk-19-1.png)<!-- -->
 
 <!-- Get list of loci with high contamination score -->
 
