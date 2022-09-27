@@ -51,7 +51,9 @@ Optional flags:
 
   - –prefix optional prefix for output file names
   - –inDir option to specify directory containing sequence data
-  - –inputType fq or fastqgz (defaults to fastqgz)
+  - –outDir option to specify directory for output files
+  - –i choose input type: fq (fastq) or fastqgz (gzipped fastq). This
+    defaults to fq
   - –useFullPrimer uses the full primer for counting reads rather than
     the trimmed primer
   - –alleleOrder order of alleles output in locusTable file. Options are
@@ -75,7 +77,7 @@ example:
 
 ``` r
 system2("perl",
-        args="AmpliconReadCounter.pl -p primerProbeFile.txt --files sampleFiles.txt")
+        args="AmpliconReadCounter.pl -p primerProbeFile.txt --files sampleFiles.txt --inDir samples")
 ```
 
 AmpliconReadCounter.pl outputs a LocusTable file and an AlleleReads file
@@ -103,13 +105,13 @@ singleSNP_alleleReads<-read.delim("AlleleReads_singleSNPs.txt",header=TRUE,row.n
 head(singleSNP_locusTable)
 ```
 
-    ##           Locus_ID ploidy alleles
-    ## 1 Ots_100884-287_1      2     C,T
-    ## 2 Ots_101554-407_1      2     C,G
-    ## 3 Ots_101704-143_1      2     G,T
-    ## 4 Ots_102213-210_1      2     A,G
-    ## 5 Ots_102414-395_1      2     A,G
-    ## 6 Ots_102457-132_1      2     A,G
+    ##           Locus_ID ploidy alleles correctionFactors
+    ## 1 Ots_100884-287_1      2     C,T               0,0
+    ## 2 Ots_101554-407_1      2     C,G               0,0
+    ## 3 Ots_101704-143_1      2     G,T               0,0
+    ## 4 Ots_102213-210_1      2     A,G               0,0
+    ## 5 Ots_102414-395_1      2     A,G               0,0
+    ## 6 Ots_102457-132_1      2     A,G               0,0
 
 ``` r
 singleSNP_alleleReads[1:5,1:5]
@@ -124,14 +126,16 @@ singleSNP_alleleReads[1:5,1:5]
 
 ## Adjusting Read Counts
 
-This step is optional and requires that read correction factors were
-included in the primer probe file. Some loci may have alleles that
-amplify unevenly which can result in allele ratios deviating from
-expectations. This can be due to allele-specific differences in
-amplification efficiency, amplification of off-target sequence that is
-counted towards one allele but not the other, or if the locus is a
-diverged duplicate (tetraploid but inherited disomically, and only one
-copy has a variant SNP).
+This step is optional, but if run it does require that read correction
+factors were included in the primer probe file. If the primer probe file
+did not inlcude correction factors this step will generate errors.
+
+Some loci may have alleles that amplify unevenly which can result in
+allele ratios deviating from expectations. This can be due to
+allele-specific differences in amplification efficiency, amplification
+of off-target sequence that is counted towards one allele but not the
+other, or if the locus is a diverged duplicate (tetraploid but inherited
+disomically, and only one copy has a variant SNP).
 
 One method of dealing with this is to adjust the read counts to account
 for this uneven amplification and bring the allele reads back to

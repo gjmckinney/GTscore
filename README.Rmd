@@ -49,7 +49,7 @@ Optional flags:
 * --prefix          optional prefix for output file names
 * --inDir           option to specify directory containing sequence data
 * --outDir          option to specify directory for output files
-* --inputType       fq or fastqgz (defaults to fastqgz)
+* --i               choose input type: fq (fastq) or fastqgz (gzipped fastq). This defaults to fq
 * --useFullPrimer	  uses the full primer for counting reads rather than the trimmed primer
 * --alleleOrder     order of alleles output in locusTable file. Options are original (matches primer-probe file order) or alphabetical (default) 
 * --printMatched    outputs matched reads for each individual
