@@ -52,14 +52,15 @@ Optional flags:
   - –prefix optional prefix for output file names
   - –inDir option to specify directory containing sequence data
   - –outDir option to specify directory for output files
-  - –i choose input type: fq (fastq) or fastqgz (gzipped fastq). This
-    defaults to fq
-  - –useFullPrimer uses the full primer for counting reads rather than
-    the trimmed primer
-  - –alleleOrder order of alleles output in locusTable file. Options are
-    original (matches primer-probe file order) or alphabetical (default)
-  - –printMatched outputs matched reads for each individual
-  - –printDiscarded outputs discarded reads for each individual
+  - –i option to choose input type: fq (fastq) or fastqgz (gzipped
+    fastq). This defaults to fq
+  - –useFullPrimer option to use the full primer for counting reads
+    rather than the trimmed primer
+  - –alleleOrder option to specify order of alleles output in locusTable
+    file. Options are original (matches primer-probe file order) or
+    alphabetical (default)
+  - –printMatched option to output matched reads for each individual
+  - –printDiscarded option to output discarded reads for each individual
 
 AmpliconReadCounter.pl can be run on the command line or called from R
 
