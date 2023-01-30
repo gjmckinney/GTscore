@@ -249,7 +249,11 @@ exportRubias<-function(polygenResults,locusTable,sampleMetaData=NULL,sampleWhite
   #split genotypes into alleles
   splitGenotypes<-as.data.frame(apply(genotypes,2,function(x) data.frame(str_split_fixed(x,",",2))),check.names=FALSE)
   #format column names
-  colnames(splitGenotypes)<-str_replace_all(colnames(splitGenotypes),c(".X1",".X2"),c("",".1"))
+  #colnames(splitGenotypes)<-str_replace_all(colnames(splitGenotypes),c(".X1",".X2"),c("",".1")) #this code used to work but doesn't with new versions of stringr, use code below to make named vector for replacement
+  orgVals=c(".X1",".X2")
+  newVals=c("",".1")
+  names(newVals)<-orgVals
+  colnames(splitGenotypes)<-str_replace_all(colnames(splitGenotypes),newVals)
   #str_replace_all replaces NA with "", fill in missing NAs
   splitGenotypes[splitGenotypes==""]<-NA
   rownames(splitGenotypes)<-rownames(genotypes)
